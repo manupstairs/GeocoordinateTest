@@ -5,9 +5,12 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Devices.Geolocation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
+using Windows.Storage.Pickers;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -64,7 +67,7 @@ namespace GeocoordinateTest
                 await Dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
                 {
                     CurrentSpeed = geoPosition.Coordinate.Speed.Value;
-                    listBoxSpeed.Items.Add(CurrentSpeed);
+                    listBoxSpeed.Items.Add($"{CurrentSpeed * 60 * 60 / 1000} Kilometers per hour.");
                 });
             }
             catch (Exception ex)
@@ -75,6 +78,7 @@ namespace GeocoordinateTest
 
         private async void Initialize()
         {
+            FakeData();
             var status = await Geolocator.RequestAccessAsync();
             if (status == GeolocationAccessStatus.Allowed)
             {
@@ -93,16 +97,49 @@ namespace GeocoordinateTest
             await Dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
              {
                  CurrentSpeed = args.Position.Coordinate.Speed.Value;
-                 listBoxPosition.Items.Add(CurrentSpeed);
+                 listBoxPosition.Items.Add($"{CurrentSpeed * 60 * 60 / 1000} Kilometers per hour.");
              });
             
         }
 
-        //private async void CalculateSpeed()
-        //{
-        //    Geolocator = new Geolocator();
-        //    var geoPosition = await Geolocator.GetGeopositionAsync();
-        //    CurrentSpeed = geoPosition.Coordinate.Speed.Value;
-        //}
+        private async void Button_Click(object sender, RoutedEventArgs e)
+        {
+            var data = listBoxSpeed.Items.Select(i => i.ToString());
+            
+                await SaveGeoLocationSpeedData(data);
+            
+        }
+
+        private async Task SaveGeoLocationSpeedData(IEnumerable<string> data)
+        {
+            var savePicker = new FileSavePicker();
+            savePicker.SuggestedStartLocation = PickerLocationId.Desktop;
+            // Dropdown of file types the user can save the file as
+            savePicker.FileTypeChoices.Add("Plain Text", new List<string>() { ".txt" });
+            // Default file name if the user does not type one in or select a file to replace
+            savePicker.SuggestedFileName = "GeoLocation Speed";
+
+            StorageFile file = await savePicker.PickSaveFileAsync();
+            if (file != null)
+            {
+                // Prevent updates to the remote version of the file until
+                // we finish making changes and call CompleteUpdatesAsync.
+                CachedFileManager.DeferUpdates(file);
+            // write to file
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
+            {
+                await FileIO.WriteLinesAsync(file, data);
+
+            });
+            }
+        }
+
+        private void FakeData()
+        {
+            for (var i = 0; i < 10; i++)
+            {
+                listBoxSpeed.Items.Add($"{i * 60 * 60 / 1000} Kilometers per hour.");
+            }
+        }
     }
 }

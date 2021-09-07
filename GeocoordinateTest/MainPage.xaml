@@ -12,6 +12,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
@@ -21,5 +22,7 @@
         <ListBox x:Name="listBoxSpeed" Grid.Row="1"></ListBox>
         <TextBlock Grid.Column="1">This list we get value through PositionChanged event</TextBlock>
         <ListBox x:Name="listBoxPosition" Grid.Column="1" Grid.Row="1"></ListBox>
+
+        <Button Click="Button_Click"></Button>
     </Grid>
 </Page>
