@@ -9,6 +9,17 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <ListBox x:Name="listBoxSpeed"></ListBox>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <TextBlock>This list we get value from timer</TextBlock>
+        <ListBox x:Name="listBoxSpeed" Grid.Row="1"></ListBox>
+        <TextBlock Grid.Column="1">This list we get value through PositionChanged event</TextBlock>
+        <ListBox x:Name="listBoxPosition" Grid.Column="1" Grid.Row="1"></ListBox>
     </Grid>
 </Page>

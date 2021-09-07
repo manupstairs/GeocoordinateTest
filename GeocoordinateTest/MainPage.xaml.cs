@@ -53,25 +53,39 @@ namespace GeocoordinateTest
         {
             this.InitializeComponent();
             Initialize();
-            Timer.Interval = new TimeSpan(0,0,1);
-            Timer.Tick += Timer_Tick;
-            Timer.Start();
+            
         }
 
         private async void Timer_Tick(object sender, object e)
         {
-            var geoPosition = await Geolocator.GetGeopositionAsync();
-            await Dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
+            try
             {
-                CurrentSpeed = geoPosition.Coordinate.Speed.Value;
-                listBoxSpeed.Items.Add(CurrentSpeed);
-            });
+                var geoPosition = await Geolocator.GetGeopositionAsync(TimeSpan.FromMinutes(1), TimeSpan.FromSeconds(15));
+                await Dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
+                {
+                    CurrentSpeed = geoPosition.Coordinate.Speed.Value;
+                    listBoxSpeed.Items.Add(CurrentSpeed);
+                });
+            }
+            catch (Exception ex)
+            {
+                listBoxSpeed.Items.Add(ex.Message);
+            }
         }
 
-        private void Initialize()
+        private async void Initialize()
         {
-            Geolocator = new Geolocator();
-            //Geolocator.PositionChanged += Geolocator_PositionChanged;
+            var status = await Geolocator.RequestAccessAsync();
+            if (status == GeolocationAccessStatus.Allowed)
+            {
+                Geolocator = new Geolocator();
+                Geolocator.DesiredAccuracy = PositionAccuracy.High;
+                Geolocator.DesiredAccuracyInMeters = 1;
+                Geolocator.PositionChanged += Geolocator_PositionChanged;
+                Timer.Interval = new TimeSpan(0, 0, 2);
+                Timer.Tick += Timer_Tick;
+                Timer.Start();
+            }
         }
 
         private async void Geolocator_PositionChanged(Geolocator sender, PositionChangedEventArgs args)
@@ -79,7 +93,7 @@ namespace GeocoordinateTest
             await Dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
              {
                  CurrentSpeed = args.Position.Coordinate.Speed.Value;
-                 listBoxSpeed.Items.Add(CurrentSpeed);
+                 listBoxPosition.Items.Add(CurrentSpeed);
              });
             
         }
